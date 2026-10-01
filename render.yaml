@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: media-downloader
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    healthCheckPath: /api/status
+    autoDeploy: true

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaDownloader Pro - Descargador de Video, Música y Playlists</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+            },
+            darkBg: '#0f172a',
+            darkCard: '#1e293b',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-purple-500 selection:text-white">
+  <!-- Top Navigation -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+          <i data-lucide="download" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-indigo-300 to-pink-400">MediaDownloader Pro</h1>
+          <p class="text-xs text-slate-400 hidden sm:block">YouTube, Instagram, Facebook, TikTok y más</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <div id="ffmpeg-badge" class="hidden items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>FFmpeg Activo</span>
+        </div>
+        <button id="btn-open-folder" title="Abrir carpeta de descargas" class="flex items-center space-x-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-lg transition border border-slate-700 hover:border-slate-600 shadow-sm">
+          <i data-lucide="folder" class="w-4 h-4 text-purple-400"></i>
+          <span class="hidden sm:inline">Carpeta de Descargas</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 space-y-8">
+    
+    <!-- Hero / Input Section -->
+    <div class="text-center space-y-3 pt-2 pb-2">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+        Descarga Videos, Música y Playlists
+      </h2>
+      <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+        Conoce el <span class="text-purple-400 font-semibold">peso exacto</span> antes de descargar, elige resolución, convierte a MP3 o extrae listas de reproducción completas.
+      </p>
+    </div>
+
+    <!-- URL Input Box -->
+    <div class="relative bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-2xl backdrop-blur-xl transition hover:border-slate-700">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+            <i data-lucide="link" class="w-5 h-5"></i>
+          </div>
+          <input 
+            type="text" 
+            id="url-input" 
+            placeholder="Pega el enlace de YouTube, Instagram, Facebook, Playlist o Video..."
+            class="w-full pl-11 pr-24 py-3.5 bg-slate-950/70 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base transition"
+          />
+          <button 
+            id="btn-paste"
+            type="button" 
+            class="absolute inset-y-1.5 right-1.5 px-3 py-1 text-xs font-medium text-slate-300 bg-slate-800/90 hover:bg-slate-700 rounded-lg flex items-center space-x-1.5 transition">
+            <i data-lucide="clipboard" class="w-3.5 h-3.5"></i>
+            <span>Pegar</span>
+          </button>
+        </div>
+
+        <button 
+          id="btn-inspect" 
+          class="flex items-center justify-center space-x-2 px-6 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-lg shadow-purple-600/30 transition transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i data-lucide="search" class="w-5 h-5"></i>
+          <span>Analizar</span>
+        </button>
+      </div>
+
+      <!-- Supported Badges -->
+      <div class="flex flex-wrap items-center justify-center gap-2 pt-4 text-xs text-slate-400">
+        <span class="text-slate-500 mr-1">Compatible con:</span>
+        <span class="px-2.5 py-1 rounded-md bg-slate-800/70 border border-slate-700/50 flex items-center gap-1.5">
+          <i data-lucide="youtube" class="w-3.5 h-3.5 text-red-500"></i> YouTube & Shorts
+        </span>
+        <span class="px-2.5 py-1 rounded-md bg-slate-800/70 border border-slate-700/50 flex items-center gap-1.5">
+          <i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-500"></i> Instagram Reels
+        </span>
+        <span class="px-2.5 py-1 rounded-md bg-slate-800/70 border border-slate-700/50 flex items-center gap-1.5">
+          <i data-lucide="facebook" class="w-3.5 h-3.5 text-blue-500"></i> Facebook
+        </span>
+        <span class="px-2.5 py-1 rounded-md bg-slate-800/70 border border-slate-700/50 flex items-center gap-1.5">
+          <i data-lucide="music" class="w-3.5 h-3.5 text-purple-400"></i> TikTok & Audio
+        </span>
+        <span class="px-2.5 py-1 rounded-md bg-slate-800/70 border border-slate-700/50 flex items-center gap-1.5">
+          <i data-lucide="list-music" class="w-3.5 h-3.5 text-amber-400"></i> Playlists
+        </span>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="hidden text-center py-12 space-y-4">
+      <div class="inline-block relative w-12 h-12">
+        <div class="w-12 h-12 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin"></div>
+      </div>
+      <p class="text-slate-300 font-medium animate-pulse" id="loading-text">Analizando enlace y calculando tamaños de formatos...</p>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div id="error-box" class="hidden p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-start space-x-3">
+      <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+      <div class="flex-1" id="error-message"></div>
+      <button onclick="document.getElementById('error-box').classList.add('hidden')" class="text-red-400 hover:text-red-300">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Results Container -->
+    <div id="results-container" class="hidden space-y-6">
+      
+      <!-- Media Header Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row gap-5 items-center sm:items-start shadow-xl">
+        <div class="relative w-full sm:w-60 h-36 bg-slate-950 rounded-xl overflow-hidden flex-shrink-0 border border-slate-800">
+          <img id="media-thumb" src="" alt="Miniatura" class="w-full h-full object-cover">
+          <div id="media-duration-badge" class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white text-xs font-mono font-medium"></div>
+        </div>
+        <div class="flex-1 space-y-2 text-center sm:text-left w-full">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span id="media-badge-source" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">YouTube</span>
+            <span id="media-type-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">Video</span>
+          </div>
+          <h3 id="media-title" class="text-lg sm:text-xl font-bold text-white leading-snug line-clamp-2"></h3>
+          <p id="media-author" class="text-sm text-slate-400 flex items-center justify-center sm:justify-start gap-1">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i>
+            <span id="media-author-name"></span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Mode Tabs (Video / Audio / Playlist) -->
+      <div class="flex border-b border-slate-800 space-x-2">
+        <button id="tab-video" class="tab-btn active px-5 py-3 font-medium text-sm border-b-2 border-purple-500 text-purple-400 flex items-center space-x-2 transition">
+          <i data-lucide="video" class="w-4 h-4"></i>
+          <span>Descargar Video</span>
+        </button>
+        <button id="tab-audio" class="tab-btn px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 transition">
+          <i data-lucide="headphones" class="w-4 h-4"></i>
+          <span>Música / Audio (MP3)</span>
+        </button>
+        <button id="tab-playlist" class="tab-btn hidden px-5 py-3 font-medium text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 transition">
+          <i data-lucide="list-video" class="w-4 h-4"></i>
+          <span>Playlist (<span id="playlist-count-tab">0</span> videos)</span>
+        </button>
+      </div>
+
+      <!-- Tab Content: Video -->
+      <div id="content-video" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-semibold text-slate-300">Formatos y Calidades Disponibles</h4>
+          <span class="text-xs text-slate-400">Los tamaños son calculados y verificados</span>
+        </div>
+        <div id="video-options-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Tarjetas de video generadas dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Tab Content: Audio / Music -->
+      <div id="content-audio" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-semibold text-slate-300">Extracción de Música y Formatos de Audio</h4>
+          <span class="text-xs text-slate-400">Conversión directa de alta fidelidad</span>
+        </div>
+        <div id="audio-options-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Tarjetas de audio generadas dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Tab Content: Playlist -->
+      <div id="content-playlist" class="hidden space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <div class="flex items-center space-x-3">
+            <input type="checkbox" id="playlist-select-all" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 bg-slate-800 border-slate-700" checked>
+            <label for="playlist-select-all" class="text-sm font-medium text-slate-200 cursor-pointer">Seleccionar todos (<span id="playlist-selected-count">0</span> seleccionados)</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="playlist-batch-format" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none">
+              <option value="video-best">Video Mejor Calidad (MP4)</option>
+              <option value="video-720">Video 720p HD (Ligero)</option>
+              <option value="audio-320">Audio MP3 (320 kbps)</option>
+              <option value="audio-192">Audio MP3 (192 kbps)</option>
+              <option value="audio-m4a">Audio Original M4A</option>
+            </select>
+            <button id="btn-download-playlist" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Descargar Lote</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de videos de la playlist -->
+        <div id="playlist-items-list" class="space-y-2 max-h-[450px] overflow-y-auto pr-1">
+          <!-- Items generados dinámicamente -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Active Downloads Section -->
+    <div id="active-downloads-section" class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4 text-purple-400"></i>
+          Descargas en Progreso y Recientes
+        </h3>
+        <button id="btn-clear-completed" class="text-xs text-slate-500 hover:text-slate-300 transition hidden">Limpiar completados</button>
+      </div>
+
+      <div id="downloads-list" class="space-y-3">
+        <div id="no-downloads-placeholder" class="text-center py-8 border border-dashed border-slate-800 rounded-xl text-slate-500 text-sm">
+          No hay descargas activas en este momento.
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+    <p>MediaDownloader Pro • Compatible con YouTube, Facebook, Instagram, TikTok y más de 1000 plataformas.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
